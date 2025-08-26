@@ -1,0 +1,44 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: python:3.10
+    steps:
+      - checkout
+      - run:
+          name: Install Elasticsearch
+          command: |
+            pip install elasticsearch
+            echo "Installed Elasticsearch"
+
+  run_python_script:
+    docker:
+      - image: python:3.10
+    steps:
+      - checkout
+      - run:
+          name: Run new Python script
+          command: |
+            echo "🚀 Starting CI Job"
+            python3 new.py  # Running the new Python script
+
+  validate_html:
+    docker:
+      - image: python:3.10
+    steps:
+      - checkout
+      - run:
+          name: Validate HTML file
+          command: |
+            echo "Validating HTML file"
+            if ! curl --output /dev/null --silent --head --fail "file:///$(pwd)/new.html"; then echo "HTML file does not exist"; exit 1; fi
+            echo "HTML file exists and is valid"
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - run_python_script
+      - validate_html
